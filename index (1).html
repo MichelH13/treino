@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bora Bill</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bora Bill">
+<meta name="theme-color" content="#080c14">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--bg3:#111a2e;--card:#141e32;--card2:#1a2540;--neon:#00f5ff;--neon2:#ff3d6b;--neon3:#7b2fff;--gold:#ffd700;--green:#00ff88;--text:#e8eef8;--muted:#5a6b8a;--border:rgba(0,245,255,0.15)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text)}
+
+#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#splash.off{display:none}
+.sbar{width:200px;height:3px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.sfill{height:100%;background:linear-gradient(90deg,#00f5ff,#7b2fff);border-radius:3px;animation:sfill 2s linear forwards}
+@keyframes sfill{from{width:0}to{width:100%}}
+.sname{font-family:'Bebas Neue',sans-serif;font-size:36px;background:linear-gradient(135deg,#fff,#00f5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px}
+.ssub{font-size:11px;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
+
+#app{height:100dvh;display:flex;flex-direction:column}
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{display:none;position:absolute;inset:0;overflow-y:auto;padding-bottom:76px}
+.screen.active{display:block}
+.screen::-webkit-scrollbar{display:none}
+
+nav{height:64px;background:rgba(8,12,20,.97);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;flex-shrink:0}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;padding:8px 0;cursor:pointer;background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;transition:color .25s}
+.nb .ico{font-size:22px;transition:transform .25s}
+.nb .lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.nb.on{color:var(--neon)}
+.nb.on .ico{transform:translateY(-3px) scale(1.15)}
+
+.ph{padding:20px 16px 8px}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;background:linear-gradient(135deg,#fff,var(--neon));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ps{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+
+.day-cards{padding:0 14px;display:flex;flex-direction:column;gap:12px}
+.dc{border-radius:18px;overflow:hidden;border:1px solid var(--border);background:var(--card);cursor:pointer}
+.dc:active{transform:scale(.97)}
+.dh{padding:16px;display:flex;align-items:center;gap:12px}
+.dn{font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:1}
+.dname{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px}
+.dmuscle{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+.dbadge{margin-left:auto;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px}
+.dprev{padding:0 14px 14px;display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:rgba(255,255,255,.06);border-radius:20px;padding:3px 9px;font-size:11px;color:rgba(255,255,255,.5)}
+
+.d1 .dh{background:linear-gradient(135deg,#1a0a0a,#2d1010);border-bottom:2px solid #ff3d6b}
+.d1 .dn{color:#ff3d6b;text-shadow:0 0 20px rgba(255,61,107,.6)}
+.d2 .dh{background:linear-gradient(135deg,#0a0f1a,#0d1a30);border-bottom:2px solid #00f5ff}
+.d2 .dn{color:#00f5ff;text-shadow:0 0 20px rgba(0,245,255,.6)}
+.d3 .dh{background:linear-gradient(135deg,#0a1a0d,#0d2a12);border-bottom:2px solid #00ff88}
+.d3 .dn{color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,.6)}
+.d4 .dh{background:linear-gradient(135deg,#1a100a,#2a1a0a);border-bottom:2px solid #ffd700}
+.d4 .dn{color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,.6)}
+
+.tips-home{margin:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.tip-r{display:flex;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+.tip-r:last-child{border:none}
+
+.det-hdr{padding:14px;display:flex;align-items:center;gap:10px;background:rgba(8,12,20,.97);position:sticky;top:0;z-index:10}
+.back{width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:var(--text);flex-shrink:0}
+.det-t{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px}
+.det-s{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+
+.ex-cards{padding:0 14px;display:flex;flex-direction:column;gap:10px}
+.exc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.exc-hdr{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer}
+.exc-ico{width:54px;height:54px;border-radius:12px;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.exc-name{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px}
+.exc-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.exc-arr{font-size:22px;color:var(--muted);transition:transform .3s;margin-left:auto}
+.exc.open .exc-arr{transform:rotate(90deg);color:var(--neon)}
+.exc-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.exc.open .exc-body{max-height:700px}
+
+.anim-panel{padding:0 14px 12px;display:flex;justify-content:center}
+.anim-box{width:100%;max-width:300px;height:150px;border-radius:14px;background:var(--bg3);border:1px solid var(--border);position:relative;overflow:hidden}
+.anim-box canvas{position:absolute;inset:0;width:100%;height:100%}
+
+.ex-tip{margin:0 14px 12px;background:rgba(123,47,255,.1);border:1px solid rgba(123,47,255,.3);border-radius:12px;padding:12px}
+.ex-tip b{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--neon3);letter-spacing:1px;display:block;margin-bottom:4px}
+.ex-tip p{font-size:12px;color:rgba(255,255,255,.7);line-height:1.6}
+
+.sets-block{padding:0 14px 14px}
+.sets-lbl{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.sets-head{display:grid;grid-template-columns:28px 1fr 1fr 36px;gap:7px;margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.sets-head span{font-size:10px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:1px}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 36px;gap:7px;align-items:center;margin-bottom:7px}
+.snum{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--muted);text-align:center}
+.sinp{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 6px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;text-align:center;outline:none;width:100%}
+.sinp:focus{border-color:var(--neon)}
+.sdone{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:all .25s}
+.sdone.on{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(0,255,136,.4)}
+.add-set{width:100%;margin-top:4px;padding:10px;background:rgba(0,245,255,.05);border:1px dashed var(--border);border-radius:9px;color:var(--neon);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px}
+
+.prog-wrap{padding:0 14px;display:flex;flex-direction:column;gap:12px}
+.prog-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.prog-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:12px;color:var(--gold)}
+.pb-wrap{height:7px;background:var(--bg3);border-radius:7px;overflow:hidden;margin-bottom:4px}
+.pb-fill{height:100%;border-radius:7px}
+.no-data{text-align:center;padding:16px;color:var(--muted);font-size:13px}
+.wh-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:10px;margin-bottom:6px}
+.wh-date{font-size:12px;color:var(--muted);flex:1}
+.wh-peso{font-family:'Orbitron',sans-serif;font-size:15px;color:var(--neon)}
+.up{color:#ff3d6b;font-size:11px;font-weight:700}.dn{color:#00ff88;font-size:11px;font-weight:700}
+
+.prof-hero{margin:14px;border-radius:18px;padding:24px 18px;background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border)}
+.avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--neon);box-shadow:0 0 20px rgba(0,245,255,.4);display:flex;align-items:center;justify-content:center;font-size:32px;background:var(--bg3);margin-bottom:12px}
+.pname{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px}
+.pmeta{font-size:12px;color:var(--muted);margin-top:2px}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 14px 12px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center}
+.stat-v{font-family:'Orbitron',sans-serif;font-size:20px;color:var(--neon)}
+.stat-l{font-size:9px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+.inp-grp{margin:0 14px 10px}
+.inp-lbl{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:13px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:600;outline:none}
+.inp:focus{border-color:var(--neon)}
+.btn-save{display:block;margin:4px 14px 14px;width:calc(100% - 28px);padding:15px;background:linear-gradient(135deg,var(--neon3),var(--neon));border:none;border-radius:13px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;cursor:pointer}
+.btn-save:active{transform:scale(.97)}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;padding:10px 14px 4px;color:var(--gold)}
+
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#000;font-weight:700;font-family:'Rajdhani',sans-serif;font-size:14px;padding:11px 22px;border-radius:30px;opacity:0;transition:all .3s;z-index:9998;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.cf{position:fixed;width:7px;height:7px;border-radius:2px;animation:cf 1.5s ease forwards;z-index:9999;pointer-events:none}
+@keyframes cf{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(350px) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div style="font-size:80px">💪</div>
+  <div class="sname">BORA BILL</div>
+  <div class="ssub">App de Treino</div>
+  <div class="sbar"><div class="sfill"></div></div>
+</div>
+
+<div id="toast"></div>
+
+<div id="app">
+  <div class="screens">
+
+    <!-- TREINOS -->
+    <div class="screen active" id="s-treinos">
+      <div class="ph"><div class="pt">TREINOS</div><div class="ps">Selecione o dia</div></div>
+      <div class="day-cards" id="day-cards"></div>
+      <div class="sec-title">⚡ DICAS RÁPIDAS</div>
+      <div class="tips-home">
+        <div class="tip-r">🕐 <span><b style="color:var(--neon)">Compostos:</b> 60-90s de descanso entre séries</span></div>
+        <div class="tip-r">🕐 <span><b style="color:var(--neon)">Isoladores:</b> 45-60s de descanso entre séries</span></div>
+        <div class="tip-r">📈 <span><b style="color:var(--gold)">Aumente a carga</b> progressivamente a cada semana</span></div>
+        <div class="tip-r">🥗 <span><b style="color:var(--green)">Alimentação</b> e hidratação são essenciais</span></div>
+        <div class="tip-r">🫀 <span><b style="color:var(--neon2)">Cardio opcional:</b> 15-30min após o treino</span></div>
+      </div>
+      <div style="height:14px"></div>
+    </div>
+
+    <!-- DETALHE -->
+    <div class="screen" id="s-detail">
+      <div class="det-hdr">
+        <button class="back" id="btn-back">←</button>
+        <div><div class="det-t" id="det-title">DIA 1</div><div class="det-s" id="det-sub"></div></div>
+      </div>
+      <div class="ex-cards" id="ex-cards"></div>
+      <div style="height:14px"></div>
+    </div>
+
+    <!-- PROGRESSO -->
+    <div class="screen" id="s-progresso">
+      <div class="ph"><div class="pt">PROGRESSO</div><div class="ps">Evolução de carga e corpo</div></div>
+      <div class="prog-wrap" id="prog-wrap"></div>
+      <div style="height:14px"></div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="screen" id="s-perfil">
+      <div class="ph"><div class="pt">PERFIL</div><div class="ps">Seus dados</div></div>
+      <div class="prof-hero">
+        <div class="avatar">💪</div>
+        <div class="pname" id="pname-d">Atleta</div>
+        <div class="pmeta" id="pmeta-d">Configure seus dados abaixo</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-v" id="sp-kg">—</div><div class="stat-l">Peso kg</div></div>
+        <div class="stat"><div class="stat-v" id="sp-cm">—</div><div class="stat-l">Altura cm</div></div>
+        <div class="stat"><div class="stat-v" id="sp-imc">—</div><div class="stat-l">IMC</div></div>
+      </div>
+      <div class="inp-grp"><div class="inp-lbl">Nome</div><input class="inp" id="f-nome" placeholder="Seu nome" type="text"></div>
+      <div class="inp-grp"><div class="inp-lbl">Peso atual (kg)</div><input class="inp" id="f-peso" placeholder="Ex: 75.5" type="number" step="0.1" inputmode="decimal"></div>
+      <div class="inp-grp"><div class="inp-lbl">Altura (cm)</div><input class="inp" id="f-alt" placeholder="Ex: 175" type="number" inputmode="numeric"></div>
+      <div class="inp-grp"><div class="inp-lbl">Objetivo</div>
+        <select class="inp" id="f-obj">
+          <option value="">Selecione...</option>
+          <option>Hipertrofia 💪</option>
+          <option>Emagrecimento 🔥</option>
+          <option>Definição ⚡</option>
+          <option>Força 🏋️</option>
+        </select>
+      </div>
+      <button class="btn-save" onclick="savePerfil()">💾 SALVAR PERFIL</button>
+      <div class="sec-title">📅 HISTÓRICO DE PESO</div>
+      <div style="padding:0 14px" id="weight-list"></div>
+      <div style="height:14px"></div>
+    </div>
+
+  </div>
+  <nav>
+    <button class="nb on" id="nb-treinos" onclick="goTo('treinos')"><span class="ico">🏋️</span><span class="lbl">Treinos</span></button>
+    <button class="nb" id="nb-progresso" onclick="goTo('progresso')"><span class="ico">📈</span><span class="lbl">Progresso</span></button>
+    <button class="nb" id="nb-perfil" onclick="goTo('perfil')"><span class="ico">👤</span><span class="lbl">Perfil</span></button>
+  </nav>
+</div>
+
+<script>
+var DAYS=[
+  {num:"01",cls:"d1",name:"PEITO, OMBRO & TRÍCEPS",badge:"PUSH",bc:"rgba(255,61,107,.15)",bb:"rgba(255,61,107,.3)",bt:"#ff3d6b",
+   ex:[
+    {n:"Supino Reto",s:4,r:"6-10",m:"Peitoral",e:"🏋️",t:"Desça a barra até o peito sem quicar. Cotovelos a 45°.",a:"press"},
+    {n:"Supino Inclinado",s:4,r:"8-12",m:"Peitoral Superior",e:"📐",t:"Inclinação 30-45°. Foque na parte superior do peitoral.",a:"press"},
+    {n:"Crucifixo",s:3,r:"10-15",m:"Peitoral",e:"🦅",t:"Movimento de abraço. Leve flexão nos cotovelos.",a:"fly"},
+    {n:"Crossover na Polia",s:3,r:"10-15",m:"Peitoral",e:"⚡",t:"Cruze as mãos no final para máxima contração.",a:"fly"},
+    {n:"Elevação Lateral",s:4,r:"10-15",m:"Deltóide Médio",e:"↔️",t:"Suba até a altura dos ombros. Controle a descida.",a:"lateral"},
+    {n:"Tríceps Corda na Polia",s:4,r:"10-15",m:"Tríceps",e:"💪",t:"Abra a corda para baixo no final. Cotovelos fixos.",a:"triceps"}
+  ]},
+  {num:"02",cls:"d2",name:"COSTAS, LOMBAR & BÍCEPS",badge:"PULL",bc:"rgba(0,245,255,.1)",bb:"rgba(0,245,255,.3)",bt:"#00f5ff",
+   ex:[
+    {n:"Puxada Frontal",s:4,r:"8-12",m:"Dorsais",e:"🔽",t:"Traga a barra ao peito com leve inclinação para trás.",a:"pulldown"},
+    {n:"Remada Curvada",s:4,r:"8-12",m:"Costas Médias",e:"🔗",t:"Coluna neutra. Puxe em direção ao umbigo.",a:"row"},
+    {n:"Remada Baixa",s:3,r:"10-12",m:"Romboides",e:"🪝",t:"Cotovelos rentes ao corpo durante o movimento.",a:"row"},
+    {n:"Pulldown Unilateral",s:3,r:"10-15",m:"Dorsais",e:"🎯",t:"Um lado por vez para corrigir assimetrias.",a:"pulldown"},
+    {n:"Extensão Lombar",s:3,r:"12-15",m:"Lombar",e:"🔙",t:"Suba só até posição neutra. Não hiperestenda.",a:"backext"},
+    {n:"Rosca Direta",s:4,r:"8-12",m:"Bíceps",e:"💪",t:"Cotovelos fixos. Suba devagar, desça mais devagar.",a:"curl"},
+    {n:"Rosca Martelo",s:3,r:"10-12",m:"Braquial",e:"🔨",t:"Polegar para cima. Trabalha bíceps e braquial.",a:"curl"}
+  ]},
+  {num:"03",cls:"d3",name:"PERNA COMPLETA & GLÚTEOS",badge:"LEGS",bc:"rgba(0,255,136,.1)",bb:"rgba(0,255,136,.3)",bt:"#00ff88",
+   ex:[
+    {n:"Agachamento Livre",s:4,r:"6-10",m:"Quadríceps/Glúteos",e:"🦵",t:"Joelhos na direção dos pés. Profundidade total.",a:"squat"},
+    {n:"Leg Press 45°",s:4,r:"8-12",m:"Quadríceps",e:"🦿",t:"Não trave os joelhos no topo. Pés altos = mais glúteo.",a:"legpress"},
+    {n:"Stiff",s:4,r:"8-12",m:"Posteriores/Glúteos",e:"📏",t:"Sinta o alongamento. Coluna sempre reta.",a:"stiff"},
+    {n:"Cadeira Extensora",s:3,r:"10-15",m:"Quadríceps",e:"💺",t:"Contraia no topo 1 segundo. Descida controlada.",a:"legext"},
+    {n:"Mesa Flexora",s:3,r:"10-15",m:"Posteriores",e:"🛋️",t:"Quadris pressionados na almofada o tempo todo.",a:"legcurl"},
+    {n:"Elevação Pélvica (Hip Thrust)",s:4,r:"8-12",m:"Glúteos",e:"🍑",t:"Aperte os glúteos no topo. Queixo para o peito.",a:"hipthrust"}
+  ]},
+  {num:"04",cls:"d4",name:"OMBRO, BÍCEPS & TRÍCEPS",badge:"ARMS",bc:"rgba(255,215,0,.1)",bb:"rgba(255,215,0,.3)",bt:"#ffd700",
+   ex:[
+    {n:"Desenvolvimento c/ Halteres",s:4,r:"8-12",m:"Deltóide",e:"🏋️",t:"Rotação natural. Não trave no topo.",a:"press"},
+    {n:"Elevação Lateral",s:4,r:"10-15",m:"Deltóide Médio",e:"↔️",t:"Leve inclinação do polegar para baixo.",a:"lateral"},
+    {n:"Elevação Frontal",s:3,r:"10-15",m:"Deltóide Anterior",e:"⬆️",t:"Alternado ou simultâneo. Não balance o corpo.",a:"lateral"},
+    {n:"Crucifixo Inverso",s:3,r:"10-15",m:"Deltóide Posterior",e:"🔄",t:"Incline o tronco. Cotovelos para os lados.",a:"fly"},
+    {n:"Rosca Direta",s:4,r:"8-12",m:"Bíceps",e:"💪",t:"Full ROM: estenda completamente na descida.",a:"curl"},
+    {n:"Rosca Concentrada",s:3,r:"10-12",m:"Bíceps",e:"🎯",t:"Cotovelo no joelho. Máxima concentração.",a:"curl"},
+    {n:"Tríceps Testa",s:4,r:"8-12",m:"Tríceps",e:"🧠",t:"Só o antebraço se move. Cotovelos para cima.",a:"triceps"},
+    {n:"Tríceps Corda na Polia",s:3,r:"10-15",m:"Tríceps",e:"🪢",t:"Abra a corda para baixo no final.",a:"triceps"}
+  ]}
+];
+
+var SD=JSON.parse(localStorage.getItem('bb_s')||'{}');
+var PR=JSON.parse(localStorage.getItem('bb_p')||'{"nome":"","peso":"","alt":"","obj":""}');
+var WH=JSON.parse(localStorage.getItem('bb_w')||'[]');
+var AL={};
+
+// NAV
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on')});
+  document.getElementById('s-'+id).classList.add('active');
+  var nb=document.getElementById('nb-'+id);
+  if(nb)nb.classList.add('on');
+  if(id==='progresso')buildProg();
+  if(id==='perfil')buildPerfil();
+}
+
+document.getElementById('btn-back').onclick=function(){
+  Object.keys(AL).forEach(function(k){cancelAnimationFrame(AL[k])});
+  AL={};
+  goTo('treinos');
+};
+
+// DIAS
+function buildDays(){
+  var w=document.getElementById('day-cards');
+  DAYS.forEach(function(d,i){
+    var div=document.createElement('div');
+    div.className='dc '+d.cls;
+    var chips=d.ex.slice(0,4).map(function(x){return'<div class="chip">'+x.e+' '+x.n+'</div>'}).join('');
+    if(d.ex.length>4)chips+='<div class="chip">+'+(d.ex.length-4)+' mais</div>';
+    div.innerHTML='<div class="dh"><div class="dn">'+d.num+'</div>'
+      +'<div><div class="dname">'+d.name+'</div><div class="dmuscle">'+d.ex.length+' exercícios</div></div>'
+      +'<span class="dbadge" style="background:'+d.bc+';color:'+d.bt+';border:1px solid '+d.bb+'">'+d.badge+'</span></div>'
+      +'<div class="dprev">'+chips+'</div>';
+    div.onclick=function(){openDay(i)};
+    w.appendChild(div);
+  });
+}
+
+// ABRIR DIA
+function openDay(di){
+  var day=DAYS[di];
+  document.getElementById('det-title').textContent='DIA '+day.num;
+  document.getElementById('det-sub').textContent=day.name;
+  Object.keys(AL).forEach(function(k){cancelAnimationFrame(AL[k])});AL={};
+  var wrap=document.getElementById('ex-cards');wrap.innerHTML='';
+  day.ex.forEach(function(ex,ei){
+    var key='d'+di+'e'+ei;
+    if(!SD[key]){SD[key]=[];for(var i=0;i<ex.s;i++)SD[key].push({kg:'',reps:'',done:false});}
+    var c=document.createElement('div');c.className='exc';c.id='ec'+di+ei;
+    c.innerHTML='<div class="exc-hdr" id="eh'+di+ei+'">'
+      +'<div class="exc-ico">'+ex.e+'</div>'
+      +'<div style="flex:1"><div class="exc-name">'+ex.n+'</div><div class="exc-meta">'+ex.s+' séries × '+ex.r+' · '+ex.m+'</div></div>'
+      +'<div class="exc-arr">›</div></div>'
+      +'<div class="exc-body">'
+        +'<div class="anim-panel"><div class="anim-box"><canvas id="cv'+di+ei+'" width="300" height="150"></canvas></div></div>'
+        +'<div class="ex-tip"><b>⚡ EXECUÇÃO</b><p>'+ex.t+'</p></div>'
+        +'<div class="sets-block">'
+          +'<div class="sets-lbl">Registro de Séries</div>'
+          +'<div class="sets-head"><span>Nº</span><span>Carga kg</span><span>Reps</span><span>✓</span></div>'
+          +'<div id="sr'+di+ei+'"></div>'
+          +'<button class="add-set" id="as'+di+ei+'">+ Adicionar Série</button>'
+        +'</div>'
+      +'</div>';
+    wrap.appendChild(c);
+    renderSets(di,ei);
+    (function(d,e){
+      document.getElementById('eh'+d+e).onclick=function(){
+        var card=document.getElementById('ec'+d+e);
+        var wasOpen=card.classList.contains('open');
+        document.querySelectorAll('.exc').forEach(function(x){x.classList.remove('open')});
+        if(!wasOpen){card.classList.add('open');startAnim('cv'+d+e,DAYS[d].ex[e].a);}
+      };
+      document.getElementById('as'+d+e).onclick=function(){
+        SD['d'+d+'e'+e].push({kg:'',reps:'',done:false});
+        localStorage.setItem('bb_s',JSON.stringify(SD));
+        renderSets(d,e);
+      };
+    })(di,ei);
+  });
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('s-detail').classList.add('active');
+  document.getElementById('s-detail').scrollTop=0;
+}
+
+function renderSets(d,e){
+  var key='d'+d+'e'+e;
+  var wrap=document.getElementById('sr'+d+e);if(!wrap)return;
+  wrap.innerHTML='';
+  SD[key].forEach(function(s,si){
+    var row=document.createElement('div');row.className='set-row';
+    row.innerHTML='<div class="snum">'+(si+1)+'</div>'
+      +'<input class="sinp" type="number" step="0.5" min="0" inputmode="decimal" placeholder="kg" value="'+s.kg+'">'
+      +'<input class="sinp" type="number" min="0" inputmode="numeric" placeholder="reps" value="'+s.reps+'">'
+      +'<div class="sdone'+(s.done?' on':'')+'">'+( s.done?'✓':'○')+'</div>';
+    var ins=row.querySelectorAll('input');
+    ins[0].onchange=function(){SD[key][si].kg=this.value;localStorage.setItem('bb_s',JSON.stringify(SD))};
+    ins[1].onchange=function(){SD[key][si].reps=this.value;localStorage.setItem('bb_s',JSON.stringify(SD))};
+    row.querySelector('.sdone').onclick=function(){
+      SD[key][si].done=!SD[key][si].done;
+      localStorage.setItem('bb_s',JSON.stringify(SD));
+      renderSets(d,e);
+      if(SD[key][si].done){showToast('🔥 Série concluída!');boom();}
+    };
+    wrap.appendChild(row);
+  });
+}
+
+// ANIMAÇÕES
+function startAnim(id,type){
+  if(AL[id])cancelAnimationFrame(AL[id]);
+  var cv=document.getElementById(id);if(!cv)return;
+  var ctx=cv.getContext('2d');cv.width=300;cv.height=150;
+  var f=0;
+  var cc={press:['#00f5ff','#ff3d6b'],fly:['#ff3d6b','#7b2fff'],pulldown:['#00f5ff','#00ff88'],row:['#00f5ff','#7b2fff'],curl:['#ffd700','#ff6b35'],triceps:['#ffd700','#ff3d6b'],lateral:['#7b2fff','#00f5ff'],squat:['#00ff88','#7b2fff'],legpress:['#00ff88','#00f5ff'],stiff:['#00ff88','#ffd700'],legext:['#00ff88','#ff6b35'],legcurl:['#00ff88','#ffd700'],hipthrust:['#ff3d6b','#ffd700'],backext:['#00f5ff','#7b2fff']};
+  var c=cc[type]||['#00f5ff','#7b2fff'];
+  function loop(){
+    ctx.clearRect(0,0,300,150);
+    var t=f/30;
+    var g=ctx.createRadialGradient(150,75,0,150,75,130);
+    g.addColorStop(0,c[0]+'22');g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(0,0,300,150);
+    ctx.save();ctx.translate(150,75);
+    ctx.strokeStyle=c[0];ctx.lineWidth=3.5;ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowBlur=10;ctx.shadowColor=c[0];
+    anim(ctx,t,type,c[0],c[1]);
+    ctx.restore();f++;AL[id]=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function L(ctx,x1,y1,x2,y2){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+function H(ctx,x,y,c){ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fillStyle=c+'44';ctx.fill();ctx.strokeStyle=c;ctx.stroke();}
+function BAR(ctx,x1,y,x2,c){var o=ctx.strokeStyle,w=ctx.lineWidth;ctx.strokeStyle=c;ctx.lineWidth=6;L(ctx,x1,y,x2,y);ctx.strokeStyle=o;ctx.lineWidth=w;}
+function GND(ctx,y){ctx.fillStyle='#334';ctx.fillRect(-60,y,120,5);}
+
+function anim(ctx,t,tp,c1,c2){
+  if(tp==='press'){
+    var bH=-18+Math.sin(t*1.5)*20;
+    ctx.fillStyle='#334';ctx.fillRect(-48,12,96,9);ctx.fillRect(-10,21,20,22);
+    BAR(ctx,-44,bH,44,c2);H(ctx,0,-2,c1);
+    L(ctx,0,7,0,24);L(ctx,-8,12,-34,bH+1);L(ctx,8,12,34,bH+1);L(ctx,-5,24,-14,44);L(ctx,5,24,14,44);
+  }else if(tp==='fly'){
+    var a=Math.sin(t*1.5)*36;
+    ctx.fillStyle='#334';ctx.fillRect(-48,12,96,9);ctx.fillRect(-10,21,20,22);
+    H(ctx,0,-2,c1);L(ctx,0,7,0,24);L(ctx,-5,24,-14,44);L(ctx,5,24,14,44);
+    L(ctx,-8,12,-38,8+a*.3);L(ctx,8,12,38,8+a*.3);
+    ctx.beginPath();ctx.arc(-40,8+a*.3,5,0,Math.PI*2);ctx.fillStyle=c2;ctx.fill();
+    ctx.beginPath();ctx.arc(40,8+a*.3,5,0,Math.PI*2);ctx.fill();
+  }else if(tp==='pulldown'){
+    var bY=-42+Math.sin(t*1.5)*18;
+    ctx.strokeStyle='#445';ctx.lineWidth=5;L(ctx,-50,-58,50,-58);
+    ctx.strokeStyle='#556';ctx.lineWidth=2;ctx.setLineDash([3,3]);L(ctx,0,-58,0,bY);ctx.setLineDash([]);
+    BAR(ctx,-32,bY,32,c2);ctx.strokeStyle=c1;ctx.lineWidth=3.5;
+    H(ctx,0,4,c1);L(ctx,0,13,0,34);L(ctx,-5,34,-16,55);L(ctx,5,34,16,55);L(ctx,-8,18,-32,bY+1);L(ctx,8,18,32,bY+1);GND(ctx,56);
+  }else if(tp==='row'){
+    var pl=Math.sin(t*1.5)*18;
+    ctx.save();ctx.rotate(-.35);H(ctx,0,-38,c1);L(ctx,0,-29,0,-4);L(ctx,-5,-4,-18,18);L(ctx,5,-4,18,18);
+    L(ctx,-8,-20,-30+pl*.4,-12+pl*.15);L(ctx,8,-20,30-pl*.4,-12+pl*.15);
+    BAR(ctx,-34,-12+pl*.15,34,-12+pl*.15,c2);ctx.restore();GND(ctx,38);
+  }else if(tp==='curl'){
+    var ang=Math.PI/6+Math.sin(t*1.5)*(Math.PI/3);
+    H(ctx,0,-28,c1);L(ctx,0,-19,0,5);L(ctx,-5,5,-16,28);L(ctx,5,5,16,28);
+    var ax=Math.cos(ang)*32,ay=Math.sin(ang)*32;
+    L(ctx,-8,-5,-8-ax*.7,-5+ay*.7);L(ctx,8,-5,8+ax*.7,-5+ay*.7);
+    BAR(ctx,-8-ax*.7-8,-5+ay*.7,-8-ax*.7+8,-5+ay*.7,c2);
+    BAR(ctx,8+ax*.7-8,-5+ay*.7,8+ax*.7+8,-5+ay*.7,c2);GND(ctx,50);
+  }else if(tp==='triceps'){
+    var ext=(Math.sin(t*1.5)+1)/2,ey=-5+40*ext;
+    H(ctx,0,-30,c1);L(ctx,0,-21,0,3);L(ctx,-5,3,-16,26);L(ctx,5,3,16,26);
+    L(ctx,-8,-5,-8,ey);L(ctx,8,-5,8,ey);L(ctx,-8,ey,-22,ey+10);L(ctx,8,ey,22,ey+10);
+    ctx.strokeStyle='#555';ctx.lineWidth=2;ctx.setLineDash([2,2]);L(ctx,0,-58,0,-10);ctx.setLineDash([]);GND(ctx,50);
+  }else if(tp==='lateral'){
+    var la=Math.sin(t*1.5),lang=Math.PI/2+la*.55;
+    H(ctx,0,-32,c1);L(ctx,0,-23,0,2);L(ctx,-5,2,-16,26);L(ctx,5,2,16,26);
+    var lax=Math.cos(lang)*32,lay=-Math.sin(lang)*32;
+    L(ctx,-8,-12,-8-lax,-12-lay);L(ctx,8,-12,8+lax,-12-lay);
+    ctx.fillStyle=c2;ctx.beginPath();ctx.arc(-8-lax,-12-lay,5,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(8+lax,-12-lay,5,0,Math.PI*2);ctx.fill();GND(ctx,50);
+  }else if(tp==='squat'){
+    var ph=(Math.sin(t*1.2)+1)/2,dip=ph*24;
+    BAR(ctx,-38,-22+dip,38,-22+dip,c2);H(ctx,0,-42+dip,c1);L(ctx,0,-33+dip,0,-8+dip);
+    var kx=18+ph*4,ky=12+dip+ph*22;
+    L(ctx,-8,-8+dip,-kx,ky);L(ctx,-kx,ky,-12,54);L(ctx,8,-8+dip,kx,ky);L(ctx,kx,ky,12,54);GND(ctx,54);
+  }else if(tp==='legpress'){
+    var ex=Math.sin(t*1.5)*22;
+    ctx.fillStyle='#334';ctx.fillRect(-58,-48,14,96);ctx.fillRect(-58,45,116,7);
+    H(ctx,42,-8,c1);L(ctx,42,1,42,22);L(ctx,34,10,-2+ex,-34);L(ctx,50,10,10+ex,-34);BAR(ctx,-38,-45,-18,-45,c2);
+  }else if(tp==='stiff'){
+    var be=(Math.sin(t*1.2)+1)/2;
+    ctx.save();ctx.rotate(-be*.75);H(ctx,0,-36,c1);L(ctx,0,-27,0,-2);L(ctx,-5,-10,-28,12);L(ctx,5,-10,28,12);BAR(ctx,-34,12,34,12,c2);ctx.restore();
+    L(ctx,-10,30,-14,55);L(ctx,10,30,14,55);GND(ctx,55);
+  }else if(tp==='legext'){
+    var le=(Math.sin(t*1.5)+1)/2;
+    ctx.fillStyle='#334';ctx.fillRect(-56,-22,14,78);ctx.fillRect(-56,50,112,7);
+    H(ctx,20,-18,c1);L(ctx,20,-9,20,12);L(ctx,12,12,12,38);L(ctx,28,12,28,38);
+    var la2=-Math.PI/2+le*Math.PI/2,ex2=Math.cos(la2)*36,ey2=Math.sin(la2)*36;
+    L(ctx,12,38,12+ex2,38+ey2);L(ctx,28,38,28+ex2,38+ey2);BAR(ctx,6+ex2,38+ey2,34+ex2,38+ey2,c2);
+  }else if(tp==='legcurl'){
+    var lc=(Math.sin(t*1.5)+1)/2;
+    ctx.fillStyle='#334';ctx.fillRect(-56,-12,112,10);ctx.fillRect(-56,48,112,7);
+    H(ctx,0,-28,c1);L(ctx,0,-19,0,4);L(ctx,-5,4,-14,4);L(ctx,5,4,14,4);
+    var la3=Math.PI/2-lc*Math.PI/2,lcx=Math.cos(la3)*36,lcy=Math.sin(la3)*36;
+    L(ctx,-12,4,-12+lcx,4+lcy);L(ctx,12,4,12+lcx,4+lcy);BAR(ctx,-12+lcx-8,4+lcy,-12+lcx+8,4+lcy,c2);
+  }else if(tp==='hipthrust'){
+    var hu=(Math.sin(t*1.5)+1)/2,hy=-8-hu*24;
+    ctx.fillStyle='#445';ctx.fillRect(-56,18,22,32);ctx.fillRect(-56,46,112,7);
+    H(ctx,-22,-8,c1);L(ctx,-22,1,-22,18);L(ctx,-22,18,0,hy);L(ctx,0,hy,26,46);L(ctx,-22,18,-5,hy);L(ctx,-5,hy,16,46);BAR(ctx,-14,hy,14,hy,c2);
+  }else if(tp==='backext'){
+    var bu=Math.sin(t*1.2)*.45;
+    ctx.fillStyle='#334';ctx.fillRect(-56,8,112,8);
+    ctx.save();ctx.rotate(-bu);H(ctx,0,-42,c1);L(ctx,0,-33,0,-5);L(ctx,-5,-18,-24,5);L(ctx,5,-18,24,5);ctx.restore();
+    L(ctx,-10,30,-14,54);L(ctx,10,30,14,54);
+  }else{
+    H(ctx,0,-28,c1);L(ctx,0,-19,0,5);L(ctx,-5,5,-14,28);L(ctx,5,5,14,28);
+  }
+}
+
+// PROGRESSO
+function buildProg(){
+  var w=document.getElementById('prog-wrap');w.innerHTML='';
+  // Peso
+  var pc=mkC('⚖️ Evolução de Peso');
+  if(WH.length>1){
+    var vals=WH.slice(-8).map(function(h){return h.p});
+    var mn=Math.min.apply(null,vals)-2,mx=Math.max.apply(null,vals)+2,W2=270,H2=90;
+    var pts=vals.map(function(v,i){return(i/(vals.length-1))*W2+','+(H2-((v-mn)/(mx-mn))*H2)}).join(' ');
+    var dots=vals.map(function(v,i){var x=(i/(vals.length-1))*W2,y=H2-((v-mn)/(mx-mn))*H2;return'<circle cx="'+x+'" cy="'+y+'" r="4" fill="#00f5ff"/><text x="'+x+'" y="'+(y-8)+'" fill="#aaa" font-size="9" text-anchor="middle">'+v+'</text>'}).join('');
+    pc.innerHTML+='<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:100px;overflow:visible;margin-top:8px"><polyline points="'+pts+'" fill="none" stroke="#00f5ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg>';
+  }else pc.innerHTML+='<div class="no-data">📝 Salve seu peso no Perfil para ver a evolução aqui</div>';
+  w.appendChild(pc);
+  // Cargas
+  var lc=mkC('🏋️ Cargas por Exercício');var any=false;
+  DAYS.forEach(function(day,di){
+    day.ex.forEach(function(ex,ei){
+      var data=SD['d'+di+'e'+ei];if(!data)return;
+      var mx2=0;data.forEach(function(s){var v=parseFloat(s.kg)||0;if(v>mx2)mx2=v});
+      if(!mx2)return;any=true;
+      var done=data.filter(function(s){return s.done}).length;
+      var pct=Math.min(mx2/150*100,100);
+      var r=document.createElement('div');r.style.cssText='margin-bottom:12px';
+      r.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
+        +'<span style="font-size:13px;font-weight:700">'+ex.e+' '+ex.n+'</span>'
+        +'<span style="font-family:Orbitron,sans-serif;font-size:13px;color:#00f5ff">'+mx2+'kg</span></div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<div class="pb-wrap" style="flex:1"><div class="pb-fill" style="width:'+pct+'%;background:linear-gradient(90deg,#7b2fff,#00f5ff)"></div></div>'
+        +'<span style="font-size:11px;color:var(--muted)">'+done+'/'+data.length+'✓</span></div>';
+      lc.appendChild(r);
+    });
+  });
+  if(!any)lc.innerHTML+='<div class="no-data">📝 Registre cargas nas séries para ver o progresso</div>';
+  w.appendChild(lc);
+  // IMC
+  if(PR.peso&&PR.alt){
+    var h=PR.alt/100,bmi=PR.peso/(h*h);
+    var lb=bmi<18.5?'Abaixo do Peso':bmi<25?'Peso Normal':bmi<30?'Sobrepeso':'Obesidade';
+    var col=bmi<18.5?'#00f5ff':bmi<25?'#00ff88':bmi<30?'#ffd700':'#ff3d6b';
+    var bc=mkC('🧮 IMC');
+    bc.innerHTML+='<div style="text-align:center;padding:8px 0">'
+      +'<div style="font-family:Orbitron,sans-serif;font-size:48px;font-weight:900;color:'+col+'">'+bmi.toFixed(1)+'</div>'
+      +'<div style="font-size:18px;color:'+col+';margin:4px 0;letter-spacing:2px;font-family:Bebas Neue,sans-serif">'+lb+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">'
+      +'<div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-family:Orbitron,sans-serif;font-size:16px;color:var(--neon)">'+PR.peso+'kg</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px">Peso</div></div>'
+      +'<div style="background:var(--bg3);border-radius:10px;padding:12px"><div style="font-family:Orbitron,sans-serif;font-size:16px;color:var(--neon3)">'+PR.alt+'cm</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px">Altura</div></div>'
+      +'</div></div>';
+    w.appendChild(bc);
+  }
+}
+function mkC(t){var d=document.createElement('div');d.className='prog-card';d.innerHTML='<div class="prog-title">'+t+'</div>';return d;}
+
+// PERFIL
+function buildPerfil(){
+  document.getElementById('f-nome').value=PR.nome||'';
+  document.getElementById('f-peso').value=PR.peso||'';
+  document.getElementById('f-alt').value=PR.alt||'';
+  document.getElementById('f-obj').value=PR.obj||'';
+  refreshP();buildWList();
+}
+function refreshP(){
+  document.getElementById('pname-d').textContent=PR.nome||'Atleta';
+  var m=[];if(PR.obj)m.push(PR.obj);if(PR.peso)m.push(PR.peso+'kg');
+  document.getElementById('pmeta-d').textContent=m.join(' · ')||'Configure seus dados abaixo';
+  document.getElementById('sp-kg').textContent=PR.peso||'—';
+  document.getElementById('sp-cm').textContent=PR.alt||'—';
+  if(PR.peso&&PR.alt){var h=PR.alt/100;document.getElementById('sp-imc').textContent=(PR.peso/(h*h)).toFixed(1);}
+  else document.getElementById('sp-imc').textContent='—';
+}
+function savePerfil(){
+  PR.nome=document.getElementById('f-nome').value;
+  PR.peso=parseFloat(document.getElementById('f-peso').value)||'';
+  PR.alt=parseFloat(document.getElementById('f-alt').value)||'';
+  PR.obj=document.getElementById('f-obj').value;
+  localStorage.setItem('bb_p',JSON.stringify(PR));
+  if(PR.peso){
+    var td=new Date().toLocaleDateString('pt-BR'),last=WH[WH.length-1];
+    if(!last||last.d!==td)WH.push({d:td,p:PR.peso});else last.p=PR.peso;
+    localStorage.setItem('bb_w',JSON.stringify(WH));
+  }
+  refreshP();buildWList();showToast('✅ Perfil salvo!');boom();
+}
+function buildWList(){
+  var el=document.getElementById('weight-list');if(!el)return;
+  if(!WH.length){el.innerHTML='<div class="no-data">Nenhum registro ainda</div>';return;}
+  el.innerHTML=WH.slice().reverse().slice(0,10).map(function(h,i){
+    var orig=WH.length-1-i,prev=WH[orig-1],diff='',cls='';
+    if(prev){var d=parseFloat((h.p-prev.p).toFixed(1));if(d>0){diff='+'+d+'kg';cls='up';}else if(d<0){diff=d+'kg';cls='dn';}}
+    return'<div class="wh-row"><span class="wh-date">📅 '+h.d+'</span><span class="wh-peso">'+h.p+'kg</span>'+(diff?'<span class="'+cls+'">'+diff+'</span>':'')+'</div>';
+  }).join('');
+}
+
+// UTILS
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200);}
+function boom(){
+  var cols=['#00f5ff','#ff3d6b','#7b2fff','#ffd700','#00ff88'];
+  for(var i=0;i<16;i++){
+    var el=document.createElement('div');el.className='cf';
+    el.style.cssText='left:'+(15+Math.random()*70)+'%;top:15%;background:'+cols[i%5]+';animation-delay:'+(Math.random()*.4)+'s';
+    document.body.appendChild(el);
+    setTimeout(function(e){return function(){e.remove()}}(el),2000);
+  }
+}
+
+// INIT — splash some first, then hide
+buildDays();
+buildPerfil();
+setTimeout(function(){
+  document.getElementById('splash').classList.add('off');
+}, 2400);
+</script>
+</body>
+</html>
