@@ -1,0 +1,31 @@
+{
+  "name": "Bora Bill — Ficha de Treino",
+  "short_name": "Bora Bill",
+  "description": "Sua ficha de treino completa para ficar grandão. Registre cargas, acompanhe progresso e IMC.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080c14",
+  "theme_color": "#080c14",
+  "icons": [
+    {
+      "src": "logo-borabill.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo-borabill.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo-borabill.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
